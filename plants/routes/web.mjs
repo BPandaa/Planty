@@ -10,10 +10,23 @@ const appRoutes = express.Router();
 // Extension: if you implement a search feature, you can pass the query parameter
 // as an argument to the above controller to return a result for a specific plant.
 
-// Route to render a list of plants
+
 appRoutes.get('/', async (req, res, next) => {
-	// TODO: use the provided function to return the plant data
-	// and render your njk file(s)
+    const query = req.query.plant || null;
+    try {
+        const plants = await getAllPlants(query);
+
+        // Check if the request is an AJAX call (could use a custom header or query param)
+        if (req.headers['x-requested-with'] === 'XMLHttpRequest') {
+            res.render('plantsList.njk', { plants });
+        } else {
+            res.render('index.njk', { plants });
+        }
+    } catch (error) {
+        console.error('Error fetching plants:', error);
+        res.status(500).send('An error occurred while fetching plants.');
+    }
 });
+
 
 export default appRoutes;

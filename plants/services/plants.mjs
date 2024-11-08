@@ -14,41 +14,32 @@ const handleRequest = async (path, params = {}) => {
 };
 
 export const getAllPlants = async (params = null) => {
-	if (params) {
-		console.log(params, 'in services');
-		try {
-			const results = await handleRequest('/', {
-				'filter[common_name]': params,
-			});
-			console.log(results.data[0]);
-			return {
-				id: results.data[0].id,
-				common_name: results.data[0].common_name,
-				scientific_name: results.data[0].scientific_name,
-				image_url: results.data[0].image_url,
-				year: results.data[0].year,
-				bibliography: results.data[0].bibliography,
-				family: results.data[0].family,
-			};
-		} catch (error) {
-			console.error('Caught error:', error);
-			throw new Error('Sorry, no plant found with that name. Details: ' + error.message);
-		}
-	} else {
-		try {
-			const results = await handleRequest('/');
-			return results.data.map((result) => ({
-				id: result.id,
-				common_name: result.common_name,
-				scientific_name: result.scientific_name,
-				image_url: result.image_url,
-				year: result.year,
-				bibliography: result.bibliography,
-				family: result.family,
-			}));
-		} catch (error) {
-			console.error('Caught error:', error);
-			throw new Error('Sorry, no plants found. Details: ' + error.message);
-		}
-	}
+    try {
+        const searchQuery = params ? params : '';
+        const results = await handleRequest('/', {
+            'filter[common_name]': searchQuery,
+        });
+        
+        // Filter to ensure partial matches if API doesn't support it directly
+        const filteredResults = results.data.filter(plant =>
+            plant.common_name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+        if (filteredResults.length === 0) {
+            throw new Error('No plant data found for the specified name.');
+        }
+
+        return filteredResults.map((result) => ({
+            id: result.id,
+            common_name: result.common_name,
+            scientific_name: result.scientific_name,
+            image_url: result.image_url,
+            year: result.year,
+            bibliography: result.bibliography,
+            family: result.family,
+        }));
+    } catch (error) {
+        console.error('Caught error:', error);
+        throw new Error('Sorry, no plant found with that name. Details: ' + error.message);
+    }
 };
