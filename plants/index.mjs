@@ -9,8 +9,8 @@ const app = express();
 app.use(cors());
 app.use(express.static('public'));
 
-app.use('/api', api); // for services
-app.use('/', web); // for students
+app.use('/api', api); 
+app.use('/', web); 
 
 nunjucks.configure('views', {
 	autoescape: true,
@@ -20,7 +20,7 @@ nunjucks.configure('views', {
 
 app.set('view engine', 'njk');
 
-const APP_PORT = process.env.APP_PORT ?? 3001;
+const APP_PORT = process.env.APP_PORT ?? 3000;
 
 app.listen(APP_PORT, () => {
 	console.log(`Server running on http://localhost:${APP_PORT}`);
